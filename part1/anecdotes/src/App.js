@@ -24,6 +24,7 @@ const App = () => {
     copy[selected] += 1;
     setVotes(copy);    
   }
+  
 
   const maxVoteIndex = votes.indexOf(Math.max(...votes));
     
