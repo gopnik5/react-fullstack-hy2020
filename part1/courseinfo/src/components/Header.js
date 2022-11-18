@@ -1,6 +1,5 @@
 const Header = (props) => {
     
-    console.log('In Header', props);
     const {name} = props;
 
     return (
