@@ -16,14 +16,15 @@ function App() {
       axios
       .get('https://restcountries.com/v3.1/all')
       .then(response => {
-        setAllCountries(response.data.map(country => country.name.common));
+        //setAllCountries(response.data.map(country => country.name.common));
+        setAllCountries(response.data);
         console.log('running effect')
       })
   },[]) 
 
   const onChange = (event) => {
 
-    setCountries(allCountries.filter((country)=>country.toUpperCase().includes(event.target.value.toUpperCase())))
+    setCountries(allCountries.filter((country)=>country.name.common.toUpperCase().includes(event.target.value.toUpperCase())))
     setFilter(event.target.value)
 
   }
