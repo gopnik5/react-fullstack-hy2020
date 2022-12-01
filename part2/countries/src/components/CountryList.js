@@ -1,23 +1,23 @@
+import { useState } from "react"
+
 const CountryList = ({countries}) => {
 
-    //response.data.map(country => country.name.common
+
+    const [shownCountry, setShownCountry] = useState(null)
 
 
-    let display = countries.map(country => <div key={country.name.common}>{country.name.common}</div>)
-    if(countries.length > 10){
-        display = <div>Too many matches, specify another filter</div>
-    }
- 
-    else if(countries.length === 1){
-        let country = countries[0]
+    const getDetails = (country) =>{
+
+        if(!country){
+            return '';
+        }
         let name = country.name.common
         let capital = country.capital
         let area = country.area
         let flags = country.flags
         let languages = Object.entries(country.languages);
 
-        Object.keys(languages)
-        display = 
+        return (
             <div>
                 <br/><br/>
                 <div style={{fontWeight: 'bold', fontSize: '25px'}}>{name}</div>
@@ -31,15 +31,28 @@ const CountryList = ({countries}) => {
                 </ul>
                 <img src={flags.png} alt="flag" />
             </div>
+        )        
+    }        
+
+    if(countries.length > 10){
+        return <div>Too many matches, specify another filter</div>
     }
+ 
+    else if(countries.length === 1){
+        return getDetails(countries[0])
+    }
+    else{
+        return (
 
-    return (
+            <div>
+                {countries.map(country => <div key={country.name.common}>{country.name.common}&nbsp;
+                <button onClick={() => {setShownCountry(country)}}>Show</button></div>)}
+               {getDetails(shownCountry)}
 
-        <div>
-            {display}
-        </div>        
+            </div>        
 
-    )
+        )
+    }
 
 
 
