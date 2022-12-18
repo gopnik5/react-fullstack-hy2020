@@ -13,6 +13,17 @@ const create = async blog => {
   return response.data
 }
 
-const blogService = { getAll, create }
+
+const like = id => {
+  return axios.put(`${baseUrl}/like/${id}`)
+
+}
+
+
+const remove = id => {
+  return axios.delete(`${baseUrl}/${id}`)
+}
+
+const blogService = { getAll, create, like, remove }
 
 export default blogService

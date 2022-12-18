@@ -1,0 +1,14 @@
+.error {
+    font-size: 25px;
+    font-weight: bold;
+    background-color: red;
+    padding: 10px;    
+}
+
+.info {
+    font-size: 25px; 
+    font-weight: bold;  
+    background-color: green; 
+    padding: 10px;      
+
+}
