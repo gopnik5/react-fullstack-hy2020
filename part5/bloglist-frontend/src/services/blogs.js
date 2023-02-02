@@ -24,6 +24,10 @@ const remove = id => {
   return axios.delete(`${baseUrl}/${id}`)
 }
 
-const blogService = { getAll, create, like, remove }
+const addComment = (id, comment) =>{
+  return axios.put(`${baseUrl}/comments/${id}`, {comment: comment})  
+} 
+
+const blogService = { getAll, create, like, remove, addComment }
 
 export default blogService

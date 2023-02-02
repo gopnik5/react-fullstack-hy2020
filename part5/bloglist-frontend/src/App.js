@@ -1,28 +1,53 @@
 import { useState, useEffect, useRef } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import {
+  BrowserRouter as Router,
+  Routes, Route, Link
+} from "react-router-dom"
+
+
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/loginService'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
 import BlogForm from './components/BlogForm'
+import Users from './components/Users'
+import { displayNotification } from './reducers/notificationReducer'
+import { setBlogs } from './reducers/blogReducer'
+import { setLoggedInUser } from './reducers/loginReducer'
+import UserDetails from './components/UserDetails'
+import Blogs from './components/Blogs'
+
+
+
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
+  //const [blogs, setBlogs] = useState([])
   const [userName, setUserName] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
+  //const [user, setUser] = useState(null)
 
-
-  const [message, setMessage] = useState(null)
-
+  
+  
+  const dispatch = useDispatch()
+  const blogs = useSelector(state => state.blogs)
+  const user = useSelector(state => {
+        console.log('state', state)
+        return state.user
+      }
+    )
+  
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
     if (loggedUserJSON) {
-      setUser(JSON.parse(loggedUserJSON));
+      dispatch(setLoggedInUser(JSON.parse(loggedUserJSON)));
     }
 
     blogService.getAll().then(blogs => {
-      setBlogs(blogs)
+      console.log('received blogs:', blogs)
+      //setBlogs(blogs)
+      dispatch(setBlogs(blogs))
     })
   }, [])
 
@@ -31,7 +56,8 @@ const App = () => {
     blogFormRef.current.toggleVisibility()
     try {
       const newBlog = await blogService.create(newObject)
-      setBlogs(blogs.concat(newBlog));
+      //setBlogs(blogs.concat(newBlog));
+      dispatch(setBlogs(blogs.concat(newBlog)))
       displayMessage('Created new blog!');
     }
     catch (exception) {
@@ -39,6 +65,30 @@ const App = () => {
       displayMessage('Could not create a new blog!', 'error');
     }
   }
+
+  const  addComment = async (id, comment)=>{
+
+
+    try{
+      await blogService.addComment(id, comment)
+
+
+
+      const newBlogs = [...blogs]
+      const blog = newBlogs.find((blog => blog.id === id))
+      blog.comments.push(comment)
+
+      dispatch(setBlogs(newBlogs))
+      displayMessage('Added new comment!'); 
+ 
+    }
+    catch (exception){
+      console.log("Couldn't add comment", exception)  
+      displayMessage('Could not add new comment!', 'error');  
+    }
+  }
+
+
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -49,7 +99,7 @@ const App = () => {
         'loggedBlogappUser', JSON.stringify(user)
       )
 
-      setUser(user)
+      dispatch(setLoggedInUser(user))
       setUserName('')
       setPassword('')
     }
@@ -61,9 +111,11 @@ const App = () => {
 
 
   const displayMessage = (text, type) => {
-    setMessage({ text, type })
+    
+    dispatch(displayNotification({text, type}))
+    
 
-    setTimeout(() => setMessage(null), 5000)
+    setTimeout(() => dispatch(displayNotification(null)), 5000)
 
   }
 
@@ -82,16 +134,16 @@ const App = () => {
 
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
+    dispatch(setLoggedInUser(null))
 
   }
 
   const like = (id) => {
     blogService.like(id)
       .then(() => {
-        setBlogs(
+        dispatch(setBlogs(
           blogs.map((blog) => blog.id === id ? { title: blog.title, author: blog.author, url: blog.url, token: blog.token, id: blog.id, likes: ++blog.likes, original: blog.original } : blog)
-        )
+        ))
       })
 
 
@@ -102,7 +154,7 @@ const App = () => {
     blogService.remove(id)
     .then(() =>{
       displayMessage('The blog has been deleted', 'success');
-      setBlogs(blogs.filter(blog => blog.id !== id))
+      dispatch(setBlogs(blogs.filter(blog => blog.id !== id)))
     })
     .catch(error => { 
       displayMessage('Could not delete the blog!', 'error');
@@ -112,11 +164,26 @@ const App = () => {
   }
 
 
+  const Menu = ()=>{
+
+    const padding = {
+      padding: 5
+    }
+
+    return (
+      <div style={{backgroundColor: 'lightblue'}}>
+        <Link style={padding} to="/">Blogs</Link>
+        <Link style={padding} to="/users">Users</Link>
+      </div>
+    )
+
+  }
+
   const blogFormRef = useRef()
   if (user === null) {
     return (
       <div><br />
-        <Notification message={message} /><br />
+        <Notification /><br />
         {loginForm}
       </div>
     )
@@ -125,20 +192,29 @@ const App = () => {
 
   return (
     <div>
-      <h2>Blogs</h2><br />
-      <Notification message={message} /><br />
+      <h2>Blogs</h2>
+
+      <Router>      
+      <Menu />
+      <Notification /><br />
+
+
       {user.userName} is logged in &nbsp;&nbsp; <button onClick={handleLogout}>Logout</button>
-      <p />
-      <Togglable buttonLabel="New Blog" ref={blogFormRef}>
-        <BlogForm createBlog={createBlog} />
-      </Togglable>
-      <p />
-      {
-        blogs.sort((a, b) => b.likes - a.likes
-        ).map(blog =>
-          <Blog key={blog.id} blog={blog} like={like} remove={remove}/>
-        )
-      }
+        <p />
+        <Togglable buttonLabel="New Blog" ref={blogFormRef}>
+          <BlogForm createBlog={createBlog} />
+        </Togglable>
+        <p />
+
+        <Routes>
+            <Route path="/userDetails/:userName" element={<UserDetails blogs={blogs}/>} /> 
+            <Route path="/users" element={<Users/>} /> 
+            <Route path="/" element={<Blogs blogs={blogs} />} /> 
+            <Route path="/blog/:id" element={<Blog blogs={blogs} like={like} remove={remove} addComment={addComment}/>} />             
+        </Routes>        
+      </Router>
+
+
     </div>
 
   )

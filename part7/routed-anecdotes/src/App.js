@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useField } from './hooks'
 
 import {
   Link,
@@ -52,7 +53,7 @@ const Anecdote = ({anecdotes}) => {
       <div>
        <h2>{anecdote.content}</h2>
        has {anecdote.votes} <br/><br/>
-       for more infor see <a href={anecdote.info}>{anecdote.info}</a>
+       for more info see <a href={anecdote.info}>{anecdote.info}</a>
       </div>
 
     )
@@ -85,14 +86,24 @@ const Footer = () => (
 )
 
 const CreateNew = (props) => {
+  /*
   const [content, setContent] = useState('')
   const [author, setAuthor] = useState('')
   const [info, setInfo] = useState('')
+  */
 
   const navigate = useNavigate()
+  const contentField = useField('text')
+  const authorField = useField('text')
+  const infoField = useField('text')
 
   const handleSubmit = (e) => {
     e.preventDefault()
+
+    const content = e.target.content.value
+    const author = e.target.content.value
+    const info = e.target.info.value
+
     props.addNew({
       content,
       author,
@@ -104,23 +115,47 @@ const CreateNew = (props) => {
     setTimeout(() => props.displayNotification(''), 5000)
   }
 
+  const resetForm = (e) =>{
+    e.preventDefault()    
+    contentField.reset()
+    authorField.reset()
+    infoField.reset()
+  }
+
   return (
     <div>
       <h2>create a new anecdote</h2>
       <form onSubmit={handleSubmit}>
         <div>
           content
-          <input name='content' value={content} onChange={(e) => setContent(e.target.value)} />
+          <input   
+            name="content"     
+            type={contentField.type}
+            value={contentField.value}
+            onChange={contentField.onChange}        
+          />          
+
         </div>
         <div>
           author
-          <input name='author' value={author} onChange={(e) => setAuthor(e.target.value)} />
+          <input 
+            name="author"                    
+            type={authorField.type}
+            value={authorField.value}
+            onChange={authorField.onChange}           
+          />  
         </div>
         <div>
           url for more info
-          <input name='info' value={info} onChange={(e)=> setInfo(e.target.value)} />
+          <input 
+            name="info"                      
+            type={infoField.type}
+            value={infoField.value}
+            onChange={infoField.onChange}           
+          />  
         </div>
         <button>create</button>
+        <button onClick={(e)=>resetForm(e)}>reset</button>
       </form>
     </div>
   )
