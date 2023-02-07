@@ -182,7 +182,7 @@ const App = () => {
   const blogFormRef = useRef()
   if (user === null) {
     return (
-      <div><br />
+      <div className="container"><br />
         <Notification /><br />
         {loginForm}
       </div>
@@ -191,7 +191,7 @@ const App = () => {
 
 
   return (
-    <div>
+    <div className="container">
       <h2>Blogs</h2>
 
       <Router>      

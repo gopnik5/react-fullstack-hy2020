@@ -1,5 +1,6 @@
 import { useParams } from "react-router-dom"
 import { useState } from "react"
+import { Table, Form} from "react-bootstrap"
 
 
 
@@ -36,12 +37,19 @@ const Blog = ({blogs, like, remove, addComment}) => {
           {blog.original? '' : <div><button style={{color: 'red'}} onClick={() => remove(blog.id)}>Remove</button></div>}
           <p/>
           <h3>Comments:</h3>
-          <div><input type="text" name="newComment" value={newComment} onChange={(event)=>setNewComment(event.target.value)} style={{float:'left'}}/>&nbsp;
-          <button style={{float:'left'}} onClick={addNewComment}>add comment</button></div>
+            <input type="text" name="newComment" value={newComment} onChange={(event)=>setNewComment(event.target.value)} />&nbsp;
+            <button onClick={addNewComment}>add comment</button>
           <div>
-          <ul>
-            {blog.comments.map((comment, index) => <li key={index}>{comment}</li>)}
-          </ul>
+          <br/> 
+
+          <Table striped>
+            <thead></thead>
+            <tbody>
+              {blog.comments.map(
+                (comment, index) => <tr key={index}><td >{comment}</td></tr>
+              )}
+            </tbody>
+          </Table>
           </div>
         </div>  
   )
